@@ -71,11 +71,13 @@
             let maxFin = parseFloat(document.getElementById("maxFinanciacion").value) || Infinity;
             
             let resultados = proyectos.filter(p => {
+                let titulo = p.titulo ? p.titulo.toLowerCase() : "";
+                let universidad = p.universidad ? p.universidad.toLowerCase() : "";
+                let ip1 = p.ip1 ? p.ip1.toLowerCase() : "";
                 let financiacionNum = parseFloat(p.financiacion.replace("€", "").replace(/\./g, "").replace(",", "")) || 0;
+                
                 return (
-                    (p.titulo.toLowerCase().includes(texto) ||
-                     p.universidad.toLowerCase().includes(texto) ||
-                     p.ip1.toLowerCase().includes(texto)) &&
+                    (titulo.includes(texto) || universidad.includes(texto) || ip1.includes(texto)) &&
                     (comunidad === "" || p.comunidad_autonoma === comunidad) &&
                     (financiacionNum >= minFin && financiacionNum <= maxFin)
                 );
@@ -97,11 +99,11 @@
             resultados.forEach(p => {
                 let div = document.createElement("div");
                 div.className = "proyecto";
-                div.innerHTML = `<b>${p.titulo}</b> (${p.universidad})<br>
-                                 <span class='ip'>IP: ${p.ip1}</span><br>
-                                 Financiación: ${p.financiacion}<br>
-                                 Comunidad: ${p.comunidad_autonoma}<br>
-                                 <a href='resumenes.html?id=${p.id}' target='_blank'>Resumen del Proyecto</a>`;
+                div.innerHTML = `<b>${p.titulo || "Sin título"}</b> (${p.universidad || "Sin universidad"})<br>
+                                 <span class='ip'>IP: ${p.ip1 || "No especificado"}</span><br>
+                                 Financiación: ${p.financiacion || "No disponible"}<br>
+                                 Comunidad: ${p.comunidad_autonoma || "No especificado"}<br>
+                                 <a href='resumenes.html?id=${p.id || ""}' target='_blank'>Resumen del Proyecto</a>`;
                 divResultados.appendChild(div);
             });
         }
