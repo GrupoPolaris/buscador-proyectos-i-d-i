@@ -74,7 +74,8 @@
                 let titulo = p.titulo ? p.titulo.toLowerCase() : "";
                 let universidad = p.universidad ? p.universidad.toLowerCase() : "";
                 let ip1 = p.ip1 ? p.ip1.toLowerCase() : "";
-                let financiacionNum = parseFloat(p.financiacion.replace("€", "").replace(/\./g, "").replace(",", "")) || 0;
+                let financiacion = p.financiacion ? p.financiacion.replace(/[^0-9]/g, "") : "0";
+                let financiacionNum = parseFloat(financiacion) || 0;
                 
                 return (
                     (titulo.includes(texto) || universidad.includes(texto) || ip1.includes(texto)) &&
