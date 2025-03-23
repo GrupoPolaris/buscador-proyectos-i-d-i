@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Proyectos</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, select { margin: 5px; padding: 8px; }
+        .proyecto { border: 1px solid #ddd; padding: 10px; margin-top: 10px; }
+        .ip { color: blue; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Buscador de Proyectos</h1>
+    
+    <input type="text" id="buscar" placeholder="Buscar por título, universidad, IP...">
+    <select id="comunidad">
+        <option value="">Todas las comunidades</option>
+    </select>
+    <input type="number" id="minFinanciacion" placeholder="Financiación mínima">
+    <input type="number" id="maxFinanciacion" placeholder="Financiación máxima">
+    <button onclick="filtrarProyectos()">Buscar</button>
+    
+    <div id="resultados"></div>
+    
+    <script>
+        let proyectos = [];
+        
+        // Cargar datos JSON
+        fetch('./proyectos.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("No se pudo cargar el archivo JSON.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                proyectos = data;
+                console.log("Proyectos cargados:", proyectos);
+                cargarComunidades();
+                filtrarProyectos();
+            })
+            .catch(error => {
+                console.error("Error cargando los proyectos: ", error);
+            });
+        
+        function cargarComunidades() {
+            let comunidades = new Set();
+            proyectos.forEach(p => {
+                if (p.comunidad && p.comunidad.trim() !== "") {
+                    comunidades.add(p.comunidad);
+                }
+            });
+            
+            let select = document.getElementById("comunidad");
+            select.innerHTML = '<option value="">Todas las comunidades</option>';
+            comunidades.forEach(com => {
+                let option = document.createElement("option");
+                option.value = com;
+                option.textContent = com;
+                select.appendChild(option);
+            });
+            console.log("Comunidades cargadas:", comunidades);
+        }
+        
+        function filtrarProyectos() {
+            let texto = document.getElementById("buscar").value.toLowerCase();
+            let comunidad = document.getElementById("comunidad").value;
+            let minFin = parseFloat(document.getElementById("minFinanciacion").value) || 0;
+            let maxFin = parseFloat(document.getElementById("maxFinanciacion").value) || Infinity;
+            
+            let resultados = proyectos.filter(p => {
+                let financiacionNum = parseFloat(p.financiacion.replace("€", "").replace(/\./g, "").replace(",", "")) || 0;
+                return (
+                    (p.nombre.toLowerCase().includes(texto) ||
+                     p.universidad.toLowerCase().includes(texto) ||
+                     p.IP.toLowerCase().includes(texto)) &&
+                    (comunidad === "" || p.comunidad === comunidad) &&
+                    (financiacionNum >= minFin && financiacionNum <= maxFin)
+                );
+            });
+            
+            console.log("Resultados encontrados:", resultados);
+            mostrarResultados(resultados);
+        }
+        
+        function mostrarResultados(resultados) {
+            let divResultados = document.getElementById("resultados");
+            divResultados.innerHTML = "";
+            
+            if (resultados.length === 0) {
+                divResultados.innerHTML = "<p>No se encontraron proyectos.</p>";
+                return;
+            }
+            
+            resultados.forEach(p => {
+                let div = document.createElement("div");
+                div.className = "proyecto";
+                div.innerHTML = `<b>${p.nombre}</b> (${p.universidad})<br>
+                                 <span class='ip'>IP: ${p.IP}</span><br>
+                                 Financiación: ${p.financiacion}<br>
+                                 Comunidad: ${p.comunidad}<br>
+                                 <a href='resumenes.html?id=${p.id}' target='_blank'>Resumen del Proyecto</a>`;
+                divResultados.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
